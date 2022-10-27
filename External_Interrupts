@@ -1,0 +1,72 @@
+#include <TimerOne.h>
+
+
+/*
+Timer interrupt demo using LEDs: RedLED will blink every 1 second and BlueLED will blink 5 times per second
+*/
+
+ String LEDStatus = "OFF";
+ int switchPin = 2;
+ int RedLED = 3;
+ int BlueLED = 4;
+ int buzzPin = 8;
+ int ledON = false;
+ volatile byte lastButtonState = LOW;
+ int numTones = 8;
+ int tones[] = {587, 784, 880, 988, 988, 988, 988, 932};
+
+
+void setup()
+{
+// Initialize the digital pins as outputs
+ pinMode(BlueLED, OUTPUT);
+ pinMode(RedLED, OUTPUT);
+ pinMode(switchPin, INPUT_PULLUP);
+ pinMode(buzzPin, OUTPUT);
+ Timer1.initialize(100000);
+ Timer1.attachInterrupt(BlinkBlue);
+ attachInterrupt(digitalPinToInterrupt(switchPin), blink, CHANGE);
+ Serial.begin(9600);
+
+}
+
+void loop()
+{
+ digitalWrite(RedLED, HIGH);
+ delay(1000);
+ digitalWrite(RedLED, LOW);
+ delay(1000);
+ byte reading = LOW;
+ reading = digitalRead(switchPin);
+ if (reading == HIGH && lastButtonState == LOW) // Detect button press
+
+ {
+   for (int i = 0; i < numTones; i++)
+      {
+      tone(buzzPin, tones[i]); // Play tune
+      delay(290);
+      }
+  noTone(buzzPin);
+  lastButtonState = !lastButtonState; // Reset button press
+  }
+}
+
+void BlinkBlue()
+{
+  if (LEDStatus=="ON")
+{
+  digitalWrite(BlueLED,LOW);
+  LEDStatus="OFF";
+  return;
+ }
+ else
+ {
+  digitalWrite(BlueLED,HIGH);
+  LEDStatus="ON";
+  return;
+  }
+ }
+ void blink()
+{
+  lastButtonState = !lastButtonState; // Reset button press
+}
